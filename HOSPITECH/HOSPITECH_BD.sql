@@ -65,7 +65,7 @@ CREATE TABLE Utilisateur (
     nom VARCHAR(100) NOT NULL,
     prenom VARCHAR(100),
     password VARCHAR(250) NOT NULL,
-    adresse_mail VARCHAR(100),
+    adresse_mail VARCHAR(100) UNIQUE,
     id_service INT,
     CONSTRAINT fk_user_service FOREIGN KEY (id_service) REFERENCES Service(id_service)
 ) ENGINE=InnoDB;
