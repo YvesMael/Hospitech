@@ -1,0 +1,48 @@
+-- Services
+INSERT INTO Service (nom_service) VALUES ('Radiologie'), ('Cardiologie'), ('Urgences');
+
+-- Catégories d'équipements
+INSERT INTO Categorie (nom_categorie) VALUES ('Imagerie'), ('Monitorage'), ('Soutien Vital');
+
+-- Salles (liées aux services)
+INSERT INTO Salle (nom_salle, id_service) VALUES 
+('Salle de Scanner 1', 1), 
+('Box Urgence A', 3), 
+('Unité Soins Intensifs', 2);
+
+-- Utilisateurs parent
+INSERT INTO Utilisateur (id_utilisateur, nom, prenom, password, adresse_mail, id_service) VALUES 
+(1, 'Dupont', 'Jean', 'pass123', 'j.dupont@hospitech.fr', 1),
+(2, 'Leclerc', 'Marie', 'pass456', 'm.leclerc@hospitech.fr', 3);
+
+-- Un Technicien
+INSERT INTO Technicien (id_utilisateur, titre) VALUES (1, 'Technicien Biomédical Senior');
+
+-- Un Personnel Médical
+INSERT INTO Personnel_medical (id_utilisateur) VALUES (2);
+
+-- Liaison Technicien <-> Catégorie (Expert en Imagerie)
+INSERT INTO Categorie_technicien (id_categorie, id_technicien) VALUES (1, 1);
+
+INSERT INTO Equipement (code_equip, num_equip, marque, modele, etat_equip, date_ajout, freq_jours, freq_mois, freq_ans, num_salle, id_categorie) VALUES 
+-- Maintenance Annuelle (Scanner)
+('SCAN-001', 1001, 'GE Health', 'Revolution CT', 'en fonctionnement', '2026-01-01', 0, 0, 1, 1, 1),
+
+-- Maintenance Hebdomadaire (Moniteur)
+('MON-002', 1002, 'Philips', 'IntelliVue', 'en maintenance', '2026-03-20', 7, 0, 0, 3, 2),
+
+-- Maintenance Journalière (Défibrillateur)
+('DEF-003', 1003, 'Zoll', 'R Series', 'en panne', '2026-03-25', 1, 0, 0, 2, 3);
+
+-- Table parente Maintenance
+INSERT INTO Maintenance (num_maintenance, date_heure, diagnostic, actions_effectuees, num_equip_ref, id_technicien) VALUES 
+(1, '2026-03-26 10:00:00', 'Révision annuelle standard', 'Nettoyage et calibration optique', 1001, 1),
+(2, '2026-03-27 14:30:00', 'Écran noir constaté', 'En attente de pièces de rechange', 1003, 1);
+
+-- Maintenance Préventive
+INSERT INTO Maint_Preventive (num_maintenance) VALUES (1);
+
+-- Maintenance Corrective (avec déclaration par le médical)
+INSERT INTO Maint_Corrective (num_maintenance, date_apparit_panne, description_panne, id_personnel_medical, statut_maint) VALUES 
+(2, '2026-03-27', 'Le moniteur ne sallume plus après une coupure de courant', 2, 'non réalisée');
+ 
