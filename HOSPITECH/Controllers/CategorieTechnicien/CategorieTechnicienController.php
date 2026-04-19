@@ -1,5 +1,5 @@
 <?php
-require_once '../Model/CategorieTechnicien.php';
+//require_once '../Model/CategorieTechnicien.php';
 
 class CategorieTechnicienController {
     private $model;

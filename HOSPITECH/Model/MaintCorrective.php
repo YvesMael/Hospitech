@@ -1,6 +1,6 @@
 <?php
 // On inclut les identifiants et la classe mère abstraite
-require_once '../config.php';
+//require_once '../config.php';
 require_once 'Maintenance.php'; 
 
 class MaintCorrective extends Maintenance {
