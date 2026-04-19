@@ -22,8 +22,12 @@ require_once 'config.php';
 // ==========================================
 // L'AUTOLOADER RADAR (POUR LE DÉBUGGAGE)
 // ==========================================
+// =========================================================================
+// 2. L'AUTOLOADER INTELLIGENT (Version propre / Production)
+// =========================================================================
 spl_autoload_register(function ($nom_de_la_classe) {
     
+    // CAS A : C'est un Contrôleur
     if (strpos($nom_de_la_classe, 'Controller') !== false) {
         $nom_table = str_replace('Controller', '', $nom_de_la_classe);
         $dossier = strtolower($nom_table);
@@ -32,28 +36,19 @@ spl_autoload_register(function ($nom_de_la_classe) {
         if (file_exists($chemin)) {
             require_once $chemin;
         } else {
-            die("<br><br><div style='background:#ffebee; padding:20px; border:2px solid red; font-family:sans-serif;'>
-                 <h3>🚨 ERREUR CONTRÔLEUR INTROUVABLE</h3>
-                 PHP a cherché ce fichier exact :<br>
-                 <b>" . __DIR__ . DIRECTORY_SEPARATOR . $chemin . "</b><br><br>
-                 Mais il n'existe pas à cet endroit précis.
-                 </div>");
+            // Si le fichier manque, on lance une exception propre
+            throw new Exception("Le fichier Contrôleur est introuvable : " . $chemin);
         }
     } 
+    // CAS B : C'est un Modèle
     else {
-        // CAS DES MODÈLES
         $chemin = 'Model/' . $nom_de_la_classe . '.php';
         
         if (file_exists($chemin)) {
             require_once $chemin;
         } else {
-            die("<br><br><div style='background:#ffebee; padding:20px; border:2px solid red; font-family:sans-serif;'>
-                 <h3>🚨 ERREUR MODÈLE INTROUVABLE</h3>
-                 L'autoloader essaie de charger la classe <b>$nom_de_la_classe</b>.<br>
-                 PHP a cherché ce fichier exact :<br>
-                 <b>" . __DIR__ . DIRECTORY_SEPARATOR . $chemin . "</b><br><br>
-                 Vérifie ce chemin lettre par lettre dans ton explorateur Windows.
-                 </div>");
+            // Si le fichier manque, on lance une exception propre
+            throw new Exception("Le fichier Modèle est introuvable : " . $chemin);
         }
     }
 });
