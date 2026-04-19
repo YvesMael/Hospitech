@@ -1,11 +1,26 @@
+-- Les Techniciens aussi appartiendront à un service qui sera créé pour eux
+-- ceci pour nous permettre de relier uniquement service à Hopital
+-- et donc un utilisateur travaillant dans un service et un service appartenant
+-- à un hopital, on peut créer plusieurs hopitaux et on saura dans lequel chacun travaille
+
 -- Création de la base de données
 CREATE DATABASE IF NOT EXISTS HOSPITECH_BD;
 USE HOSPITECH_BD;
 
+-- 0. Table Hopital
+CREATE TABLE Hopital (
+    id_hopital INT AUTO_INCREMENT PRIMARY KEY,
+    nom_hopital VARCHAR(100),
+    adresse VARCHAR(100),
+    telephone VARCHAR(50)
+)ENGINE=InnoDB;
+
 -- 1. Table Service
 CREATE TABLE Service (
     id_service INT AUTO_INCREMENT PRIMARY KEY,
-    nom_service VARCHAR(100)
+    nom_service VARCHAR(100),
+    id_hopital INT,
+    CONSTRAINT fk_hop FOREIGN KEY (id_hopital) REFERENCES Hopital(id_hopital)
 ) ENGINE=InnoDB;
 
 -- 2. Table Categorie
@@ -38,6 +53,8 @@ CREATE TABLE Equipement (
     num_salle INT,
     date_prochaine_maintenance DATE,
     id_categorie INT,
+    id_hopital INT,
+    CONSTRAINT fk_equip_hopital FOREIGN KEY (id_hopital) REFERENCES Hopital(id_hopital),
     CONSTRAINT fk_equip_categorie FOREIGN KEY (id_categorie) REFERENCES Categorie(num_categorie),
     CONSTRAINT fk_equip_salle FOREIGN KEY (num_salle) REFERENCES Salle(num_salle)
 ) ENGINE=InnoDB;
