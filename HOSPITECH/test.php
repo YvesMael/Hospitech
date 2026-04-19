@@ -1,6 +1,6 @@
 <?php
 // 1. Inclure la connexion
-require_once('config.php');
+require_once('controller/config.php');
 
 header("Content-Type: application/json");
 
