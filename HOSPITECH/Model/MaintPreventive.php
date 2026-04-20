@@ -1,5 +1,5 @@
 <?php
-require_once '../config.php';
+//require_once '../config.php';
 require_once 'Maintenance.php'; // On inclut la classe mère
 
 // La classe hérite de la classe abstraite

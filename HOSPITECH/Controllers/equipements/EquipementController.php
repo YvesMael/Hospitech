@@ -1,5 +1,5 @@
 <?php
-require_once '../Model/Equipement.php';
+//require_once '../Model/Equipement.php';
 
 class EquipementController {
     private $model;

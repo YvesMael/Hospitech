@@ -1,13 +1,13 @@
 <?php
 // Le Contrôleur inclut son Modèle
-require_once '../Model/Categorie.php';
+//require_once '../Model/Categorie.php';
 
 class CategorieController {
     private $model;
 
     public function __construct() {
         // Il instancie le modèle tout seul comme un grand !
-        $this->model = new Categorie();
+       $this->model = new Categorie();
     }
 
     public function getAll() {

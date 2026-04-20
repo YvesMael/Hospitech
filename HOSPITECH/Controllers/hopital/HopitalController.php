@@ -1,5 +1,5 @@
 <?php
-require_once '../Model/Hopital.php';
+//require_once '../Model/Hopital.php';
 
 class HopitalController {
     private $model;
