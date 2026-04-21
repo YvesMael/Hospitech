@@ -24,12 +24,18 @@ class Categorie{
         return $this->pdo->lastInsertId();
     }
 
-    public function update($num_categorie, $nom_categorie) {
-        $stmt = $this->pdo->prepare("UPDATE Categorie SET nom_categorie = :nom WHERE num_categorie = :id");
-        return $stmt->execute([
-            ':nom' => $nom_categorie,
-            ':id'  => $num_categorie
-        ]);
+    // Dans Model/Categorie.php (Fonction UPDATE)
+    public function update($data) {
+    $query = "UPDATE Categorie 
+              SET nom_categorie = :nom_categorie
+              WHERE num_categorie = :num_categorie";
+
+    $stmt = $this->pdo->prepare($query);
+    
+    return $stmt->execute([
+        ':nom_categorie' => $data->nom_categorie,
+        ':num_categorie' => $data->num_categorie
+    ]);
     }
 }
 ?>

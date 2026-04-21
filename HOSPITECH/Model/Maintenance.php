@@ -18,5 +18,28 @@ abstract class Maintenance {
         ]);
         return $this->pdo->lastInsertId();
     }
+    // Dans Model/Maintenance.php (Fonction UPDATE de base)
+public function update($data) {
+    $query = "UPDATE Maintenance 
+              SET date_heure = :date_heure,
+                  diagnostic = :diagnostic, 
+                  actions_effectuees = :actions_effectuees, 
+                  date_remise_service = :date_remise_service,
+                  num_equip_ref = :num_equip_ref,
+                  id_technicien = :id_technicien
+              WHERE num_maintenance = :num_maintenance";
+
+    $stmt = $this->pdo->prepare($query);
+    
+    return $stmt->execute([
+        ':date_heure'          => $data->date_heure,
+        ':diagnostic'          => $data->diagnostic,
+        ':actions_effectuees'  => $data->actions_effectuees,
+        ':date_remise_service' => $data->date_remise_service,
+        ':num_equip_ref'       => $data->num_equip_ref,
+        ':id_technicien'       => $data->id_technicien,
+        ':num_maintenance'     => $data->num_maintenance
+    ]);
+}
 }
 ?>

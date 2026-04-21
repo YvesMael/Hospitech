@@ -138,7 +138,23 @@ try {
             $controller = new EquipementController();
             $controller->update();
             break;
+        case 'updateHopital':
+            if ($method !== 'PUT' && $method !== 'POST') throw new Exception("Méthode PUT ou POST attendue.", 405);
+            $controller = new HopitalController();
+            $controller->update();
+            break;
 
+        case 'updateCategorie':
+            if ($method !== 'PUT' && $method !== 'POST') throw new Exception("Méthode PUT ou POST attendue.", 405);
+            $controller = new CategorieController();
+            $controller->update();
+            break;
+
+        case 'updateMaintenance':
+            if ($method !== 'PUT' && $method !== 'POST') throw new Exception("Méthode PUT ou POST attendue.", 405);
+            $controller = new MaintenanceController();
+            $controller->update();
+            break;
         // ---------------------------------------------------
         // SI L'ACTION N'EST PAS DANS LA LISTE
         // ---------------------------------------------------

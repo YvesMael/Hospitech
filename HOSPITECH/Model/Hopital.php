@@ -26,5 +26,22 @@ class Hopital{
         ]);
         return $this->pdo->lastInsertId();
     }
+   // Dans Model/Hopital.php (Fonction UPDATE)
+    public function update($data) {
+    $query = "UPDATE Hopital 
+              SET nom_hopital = :nom_hopital, 
+                  adresse = :adresse, 
+                  telephone = :telephone 
+              WHERE id_hopital = :id_hopital";
+
+    $stmt = $this->pdo->prepare($query);
+    
+    return $stmt->execute([
+        ':nom_hopital' => $data->nom_hopital,
+        ':adresse'     => $data->adresse,
+        ':telephone'   => $data->telephone,
+        ':id_hopital'  => $data->id_hopital
+    ]);
+}
 }
 ?>
