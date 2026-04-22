@@ -30,5 +30,20 @@ class CategorieTechnicien {
         $stmt->execute([':id' => $id_technicien]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    // Dans Model/CategorieTechnicien.php (Si tu l'utilises)
+    public function update($data) {
+        $query = "UPDATE Categorie_technicien 
+              SET id_categorie = :id_categorie,
+                  id_technicien = :id_technicien
+              WHERE id_cat_tech = :id_cat_tech";
+
+        $stmt = $this->pdo->prepare($query);
+    
+        return $stmt->execute([
+        ':id_categorie'  => $data->id_categorie,
+        ':id_technicien' => $data->id_technicien,
+        ':id_cat_tech'   => $data->id_cat_tech
+         ]);
+    }
 }
 ?>
