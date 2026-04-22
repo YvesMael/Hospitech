@@ -10,10 +10,10 @@ class Service {
         // Si la connexion n'existe pas encore, on la crée
         if (self::$pdo === null) {
             try {
-                self::$pdo = new PDO("mysql:host=localhost;dbname=gestion_stock;charset=utf8", "root", "");
+                self::$pdo = new PDO("mysql:host=".DB_HOST.";dbname=".DB_NAME.";charset=utf8mb4", DB_USER, DB_PASS);
                 self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            } catch (Exception $e) {
-                die("Erreur connexion : " . $e->getMessage());
+            } catch (\PDOException $e) {
+                die("Erreur HopitalModel : " . $e->getMessage());
             }
         }
         // On renvoie la connexion existante

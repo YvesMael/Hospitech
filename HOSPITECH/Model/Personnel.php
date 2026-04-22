@@ -1,6 +1,8 @@
 <?php
 
-class Personel {
+require_once 'Utilisateur.php';
+
+class Personnel {
     private $id_utilisateur;
     private static $pdo = null; 
 
@@ -8,10 +10,10 @@ class Personel {
         // Si la connexion n'existe pas encore, on la crée
         if (self::$pdo === null) {
             try {
-                self::$pdo = new PDO("mysql:host=localhost;dbname=gestion_stock;charset=utf8", "root", "");
+                self::$pdo = new PDO("mysql:host=".DB_HOST.";dbname=".DB_NAME.";charset=utf8mb4", DB_USER, DB_PASS);
                 self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            } catch (Exception $e) {
-                die("Erreur connexion : " . $e->getMessage());
+            } catch (\PDOException $e) {
+                die("Erreur HopitalModel : " . $e->getMessage());
             }
         }
         // On renvoie la connexion existante
@@ -21,10 +23,22 @@ class Personel {
     /**
      * Créer un personnel medical (après avoir créé l'utilisateur)
      */
-    public static function create($id_utilisateur) {
+    public static function create($nom, $prenom, $password, $email, $id_service) {
         $db = self::getConnexion();
-        $req = $db->prepare("INSERT INTO personnel_medical (id_utilisateur) VALUES (?)");
-        return $req->execute([$id_utilisateur]);
+        try {
+            $db->beginTransaction();
+            $id = Utilisateur::create($nom, $prenom, $password, $email, $id_service);
+            if($id){
+                // 2. Insérer dans la table technicien
+                $req = $db->prepare("INSERT INTO personnel_medical (id_utilisateur) VALUES (?)");
+                $req->execute([$id]);
+            }
+            $db->commit();
+            return true;
+        } catch (Exception $e) {
+            $db->rollBack();
+            throw $e;
+        }
     }
 
     /**
@@ -34,7 +48,7 @@ class Personel {
         $db = self::getConnexion();
         // On récupère les infos de l'utilisateur ET du personnel_medical en une fois
         $sql = "SELECT u.* 
-                FROM utilisateurs u 
+                FROM utilisateur u 
                 JOIN personnel_medical t ON u.id_utilisateur = t.id_utilisateur 
                 WHERE u.adresse_mail = ?";
         
@@ -50,7 +64,7 @@ class Personel {
         $db = self::getConnexion();
         $sql = "SELECT u.nom, u.prenom, t.id_utilisateur 
                 FROM personnel_medical t
-                JOIN utilisateurs u ON t.id_utilisateur = u.id_utilisateur
+                JOIN utilisateur u ON t.id_utilisateur = u.id_utilisateur
                 ORDER BY u.nom ASC";
         
         $req = $db->query($sql);
@@ -63,7 +77,7 @@ class Personel {
         $req = $db->prepare("DELETE FROM personnel_medical WHERE id_utilisateur = ?");
         $req->execute([$id]);
         
-        $req2 = $db->prepare("DELETE FROM utilisateurs WHERE id_utilisateur = ?");
+        $req2 = $db->prepare("DELETE FROM utilisateur WHERE id_utilisateur = ?");
         return $req2->execute([$id]);
     }
 }

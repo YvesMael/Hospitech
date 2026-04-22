@@ -84,6 +84,12 @@ try {
             $controller = new CategorieController();
             $controller->getAll();
             break;
+        
+        case 'getListeUtilisateurs':
+            if ($method !== 'GET') throw new Exception("Méthode GET attendue.", 405);
+            $controller = new UtilisateurController();
+            $controller->getAll();
+            break;
 
        /* case 'getSalles':
             if ($method !== 'GET') throw new Exception("Méthode GET attendue.", 405);
@@ -128,6 +134,30 @@ try {
             if ($method !== 'POST') throw new Exception("Méthode POST attendue.", 405);
             $controller = new MaintenanceController();
             $controller->create();
+            break;
+        
+        case 'addSalle':
+            if ($method !== 'POST') throw new Exception("Méthode POST attendue.", 405);
+            $controller = new SalleController();
+            $controller->create();
+            break;
+        
+        case 'addService':
+            if ($method !== 'POST') throw new Exception("Méthode POST attendue.", 405);
+            $controller = new ServiceController();
+            $controller->create();
+            break;
+        
+        case 'addUtilisateur':
+            if ($method !== 'POST') throw new Exception("Méthode POST attendue.", 405);
+            $controller = new UtilisateurController();
+            $controller->create();
+            break;
+        
+        case 'login':
+            if ($method !== 'POST') throw new Exception("Méthode POST attendue.", 405);
+            $controller = new UtilisateurController();
+            $controller->login();
             break;
 
         // ---------------------------------------------------
