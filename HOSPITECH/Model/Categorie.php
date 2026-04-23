@@ -2,7 +2,7 @@
 //require_once '../config.php';
 
 class Categorie{
-    private $pdo;
+    private static $pdo;
 
     public function __construct() {
         try {
