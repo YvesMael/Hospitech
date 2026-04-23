@@ -13,16 +13,19 @@ class Utilisateur {
     const COLUMNS = "id_utilisateur, nom, prenom, adresse_mail, id_service";
 
     private static function getConnexion() {
-        // Si la connexion n'existe pas encore, on la crée
         if (self::$pdo === null) {
             try {
-                self::$pdo = new PDO("mysql:host=".DB_HOST.";dbname=".DB_NAME.";charset=utf8mb4", DB_USER, DB_PASS);
+                // Suppression de charset=utf8mb4 (non supporté par le driver pgsql dans le DSN)
+                $dsn = "pgsql:host=".DB_HOST.";port=".DB_PORT.";dbname=".DB_NAME;
+                self::$pdo = new PDO($dsn, DB_USER, DB_PASS);
                 self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            } catch (Exception $e) {
-                die("Erreur connexion : " . $e->getMessage());
+                
+                // Forcer l'UTF8 si nécessaire
+                self::$pdo->exec("SET NAMES 'UTF8'");
+            } catch (\PDOException $e) {
+                die("Erreur de connexion : " . $e->getMessage());
             }
         }
-        // On renvoie la connexion existante
         return self::$pdo;
     }
 
@@ -77,8 +80,8 @@ class Utilisateur {
                    t.id_utilisateur AS est_technicien, 
                    p.id_utilisateur AS est_medical
             FROM utilisateur u
-            LEFT JOIN Technicien t ON u.id_utilisateur = t.id_utilisateur
-            LEFT JOIN Personnel_medical p ON u.id_utilisateur = p.id_utilisateur
+            LEFT JOIN technicien t ON u.id_utilisateur = t.id_utilisateur
+            LEFT JOIN personnel_medical p ON u.id_utilisateur = p.id_utilisateur
             WHERE u.adresse_mail = ?";
     
     $stmt = $db->prepare($sql);

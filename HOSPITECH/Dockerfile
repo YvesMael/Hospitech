@@ -1,7 +1,7 @@
 FROM php:8.2-apache
 
 # 1. Installation des extensions MySQL
-RUN docker-php-ext-install pdo pdo_mysql
+RUN docker-php-ext-install pdo pdo_pgsql
 
 # 2. Activation du module Rewrite (indispensable pour le routage)
 RUN a2enmod rewrite

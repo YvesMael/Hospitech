@@ -16,9 +16,9 @@ try {
                 CASE 
                     WHEN t.id_utilisateur IS NOT NULL THEN 'Technicien'
                     WHEN p.id_utilisateur IS NOT NULL THEN 'Personnel Médical'
-                    ELSE 'Utilisateur Non Assigné'
+                    ELSE 'utilisateur Non Assigné'
                 END as type_profil
-              FROM Utilisateur u
+              FROM utilisateur u
               LEFT JOIN Service s ON u.id_service = s.id_service
               LEFT JOIN Technicien t ON u.id_utilisateur = t.id_utilisateur
               LEFT JOIN Personnel_medical p ON u.id_utilisateur = p.id_utilisateur

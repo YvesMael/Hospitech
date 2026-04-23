@@ -7,11 +7,15 @@ class MaintPreventive extends Maintenance {
 
     public function __construct() {
         try {
-            // L'enfant crée la connexion et remplit l'attribut protected du parent
-            $this->pdo = new PDO("mysql:host=".DB_HOST.";dbname=".DB_NAME.";charset=utf8mb4", DB_USER, DB_PASS);
-            $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            // Suppression de charset=utf8mb4 (non supporté par le driver pgsql dans le DSN)
+            $dsn = "pgsql:host=".DB_HOST.";port=".DB_PORT.";dbname=".DB_NAME;
+            self::$pdo = new PDO($dsn, DB_USER, DB_PASS);
+            self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            
+            // Forcer l'UTF8 si nécessaire
+            self::$pdo->exec("SET NAMES 'UTF8'");
         } catch (\PDOException $e) {
-            die("Erreur Preventive : " . $e->getMessage());
+            die("Erreur de connexion : " . $e->getMessage());
         }
     }
 
@@ -24,7 +28,7 @@ class MaintPreventive extends Maintenance {
             $num_maintenance = $this->createMere($data);
 
             // 3. On insère dans la table fille
-            $stmt = $this->pdo->prepare("INSERT INTO Maint_Preventive (num_maintenance) VALUES (:num)");
+            $stmt = $this->pdo->prepare("INSERT INTO maint_preventive (num_maintenance) VALUES (:num)");
             $stmt->execute([':num' => $num_maintenance]);
 
             // 4. On valide le tout !

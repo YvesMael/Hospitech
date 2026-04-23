@@ -6,25 +6,30 @@ class Equipement {
 
     public function __construct() {
         try {
-            $this->pdo = new PDO("mysql:host=".DB_HOST.";dbname=".DB_NAME.";charset=utf8mb4", DB_USER, DB_PASS);
-            $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            // Suppression de charset=utf8mb4 (non supporté par le driver pgsql dans le DSN)
+            $dsn = "pgsql:host=".DB_HOST.";port=".DB_PORT.";dbname=".DB_NAME;
+            self::$pdo = new PDO($dsn, DB_USER, DB_PASS);
+            self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            
+            // Forcer l'UTF8 si nécessaire
+            self::$pdo->exec("SET NAMES 'UTF8'");
         } catch (\PDOException $e) {
-            die("Erreur EquipementModel : " . $e->getMessage());
+            die("Erreur de connexion : " . $e->getMessage());
         }
     }
 
     public function getAllWithDetails() {
         $query = "SELECT e.*, c.nom_categorie, s.nom_salle, h.nom_hopital
-                  FROM Equipement e
-                  LEFT JOIN Categorie c ON e.id_categorie = c.num_categorie
-                  LEFT JOIN Salle s ON e.num_salle = s.num_salle
-                  LEFT JOIN Hopital h ON e.id_hopital = h.id_hopital
+                  FROM equipement e
+                  LEFT JOIN categorie c ON e.id_categorie = c.num_categorie
+                  LEFT JOIN salle s ON e.num_salle = s.num_salle
+                  LEFT JOIN hopital h ON e.id_hopital = h.id_hopital
                   ORDER BY e.date_prochaine_maintenance ASC";
         return $this->pdo->query($query)->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function create($data) {
-        $query = "INSERT INTO Equipement 
+        $query = "INSERT INTO equipement 
                   (code_equip, num_equip, marque, modele, etat_equip, date_ajout, freq_jours, freq_mois, freq_ans, num_salle, id_categorie, id_hopital) 
                   VALUES (:code, :num, :marque, :modele, :etat, :date_aj, :fj, :fm, :fa, :salle, :cat, :hopital)";
         
@@ -47,7 +52,7 @@ class Equipement {
 
     public function update($data) {
         // La date_ajout n'est PAS ici par mesure de sécurité
-        $query = "UPDATE Equipement SET 
+        $query = "UPDATE equipement SET 
                     marque = :marque, modele = :modele, etat_equip = :etat, 
                     freq_jours = :fj, freq_mois = :fm, freq_ans = :fa, 
                     num_salle = :salle, id_categorie = :cat, id_hopital = :hopital

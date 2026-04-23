@@ -7,16 +7,19 @@ class Service {
     private static $pdo = null; 
 
     private static function getConnexion() {
-        // Si la connexion n'existe pas encore, on la crée
         if (self::$pdo === null) {
             try {
-                self::$pdo = new PDO("mysql:host=".DB_HOST.";dbname=".DB_NAME.";charset=utf8mb4", DB_USER, DB_PASS);
+                // Suppression de charset=utf8mb4 (non supporté par le driver pgsql dans le DSN)
+                $dsn = "pgsql:host=".DB_HOST.";port=".DB_PORT.";dbname=".DB_NAME;
+                self::$pdo = new PDO($dsn, DB_USER, DB_PASS);
                 self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                
+                // Forcer l'UTF8 si nécessaire
+                self::$pdo->exec("SET NAMES 'UTF8'");
             } catch (\PDOException $e) {
-                die("Erreur HopitalModel : " . $e->getMessage());
+                die("Erreur de connexion : " . $e->getMessage());
             }
         }
-        // On renvoie la connexion existante
         return self::$pdo;
     }
 

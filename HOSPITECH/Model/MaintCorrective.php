@@ -8,10 +8,15 @@ class MaintCorrective extends Maintenance {
     // 1. L'enfant gère sa propre connexion
     public function __construct() {
         try {
-            $this->pdo = new PDO("mysql:host=".DB_HOST.";dbname=".DB_NAME.";charset=utf8mb4", DB_USER, DB_PASS);
-            $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            // Suppression de charset=utf8mb4 (non supporté par le driver pgsql dans le DSN)
+            $dsn = "pgsql:host=".DB_HOST.";port=".DB_PORT.";dbname=".DB_NAME;
+            self::$pdo = new PDO($dsn, DB_USER, DB_PASS);
+            self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            
+            // Forcer l'UTF8 si nécessaire
+            self::$pdo->exec("SET NAMES 'UTF8'");
         } catch (\PDOException $e) {
-            die("Erreur de connexion (Corrective) : " . $e->getMessage());
+            die("Erreur de connexion : " . $e->getMessage());
         }
     }
 
@@ -26,7 +31,7 @@ class MaintCorrective extends Maintenance {
             $num_maintenance = $this->createMere($data);
 
             // B. On insère les données spécifiques à la PANNE dans la table Fille
-            $query = "INSERT INTO Maint_Corrective (num_maintenance, date_apparit_panne, description_panne, id_personnel_medical, statut_maint) 
+            $query = "INSERT INTO maint_corrective (num_maintenance, date_apparit_panne, description_panne, id_personnel_medical, statut_maint) 
                       VALUES (:num, :date_panne, :desc, :id_perso, :statut)";
             
             $stmt = $this->pdo->prepare($query);
