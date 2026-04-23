@@ -1,13 +1,14 @@
 FROM php:8.2-apache
 
-# 1. Installation des extensions MySQL
-RUN docker-php-ext-install pdo pdo_pgsql
+# 1. Mise à jour des dépôts et installation des dépendances système pour Postgres
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    && docker-php-ext-install pdo pdo_pgsql
 
-# 2. Activation du module Rewrite (indispensable pour le routage)
+# 2. Activation du module Rewrite (indispensable pour ton api.php)
 RUN a2enmod rewrite
 
-# 3. CONFIGURATION CRUCIALE : Autoriser le .htaccess
-# On modifie la configuration par défaut d'Apache pour que "AllowOverride All" soit actif sur /var/www/html
+# 3. Autoriser le .htaccess (Configuration Apache)
 RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
 
 # 4. Copie de ton code
