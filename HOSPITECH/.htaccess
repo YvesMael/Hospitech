@@ -1,0 +1,9 @@
+RewriteEngine On
+
+# Si la requête ne correspond pas à un fichier réel (image, css, etc.)
+RewriteCond %{REQUEST_FILENAME} !-f
+# Et si elle ne correspond pas à un dossier réel
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Alors on envoie tout vers api.php
+RewriteRule ^ api.php [QSA,L]
