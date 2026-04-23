@@ -10,11 +10,11 @@ class MaintCorrective extends Maintenance {
         try {
             // Suppression de charset=utf8mb4 (non supporté par le driver pgsql dans le DSN)
             $dsn = "pgsql:host=".DB_HOST.";port=".DB_PORT.";dbname=".DB_NAME;
-            self::$pdo = new PDO($dsn, DB_USER, DB_PASS);
-            self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            static::$pdo = new PDO($dsn, DB_USER, DB_PASS);
+            static::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             
             // Forcer l'UTF8 si nécessaire
-            self::$pdo->exec("SET NAMES 'UTF8'");
+            static::$pdo->exec("SET NAMES 'UTF8'");
         } catch (\PDOException $e) {
             die("Erreur de connexion : " . $e->getMessage());
         }
@@ -24,7 +24,7 @@ class MaintCorrective extends Maintenance {
     public function createComplete($data) {
         try {
             // Début de la transaction
-            $this->pdo->beginTransaction();
+            static::$pdo->beginTransaction();
 
             // A. On appelle la fonction de la classe Mère (MaintenanceModel)
             // Elle insère la date, le diagnostic, etc., et nous renvoie l'ID généré
@@ -34,7 +34,7 @@ class MaintCorrective extends Maintenance {
             $query = "INSERT INTO maint_corrective (num_maintenance, date_apparit_panne, description_panne, id_personnel_medical, statut_maint) 
                       VALUES (:num, :date_panne, :desc, :id_perso, :statut)";
             
-            $stmt = $this->pdo->prepare($query);
+            $stmt = static::$pdo->prepare($query);
             $stmt->execute([
                 ':num'        => $num_maintenance, // L'ID hérité de la mère
                 ':date_panne' => $data['date_apparit_panne'] ?? null,
@@ -44,12 +44,12 @@ class MaintCorrective extends Maintenance {
             ]);
 
             // Si on arrive ici sans erreur, on valide tout dans la base de données !
-            $this->pdo->commit();
+            static::$pdo->commit();
             return $num_maintenance;
 
         } catch (Exception $e) {
             // En cas d'erreur (problème de clé étrangère, champ manquant...), on annule tout
-            $this->pdo->rollBack();
+            static::$pdo->rollBack();
             throw new Exception("Erreur Maintenance Corrective : " . $e->getMessage());
         }
     }

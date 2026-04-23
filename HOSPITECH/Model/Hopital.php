@@ -23,13 +23,13 @@ class Hopital{
     }
 
     public function create($data) {
-        $stmt = $this->pdo->prepare("INSERT INTO hopital (nom_hopital, adresse, telephone) VALUES (:nom, :adresse, :tel)");
+        $stmt = self::$pdo->prepare("INSERT INTO hopital (nom_hopital, adresse, telephone) VALUES (:nom, :adresse, :tel)");
         $stmt->execute([
             ':nom'     => $data['nom_hopital'],
             ':adresse' => $data['adresse'] ?? null,
             ':tel'     => $data['telephone'] ?? null
         ]);
-        return $this->pdo->lastInsertId();
+        return self::$pdo->lastInsertId();
     }
    // Dans Model/Hopital.php (Fonction UPDATE)
     public function update($data) {

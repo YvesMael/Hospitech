@@ -19,14 +19,14 @@ class Categorie{
     }
 
     public function getAll() {
-        $stmt = $this->pdo->query("SELECT * FROM categorie ORDER BY nom_categorie ASC");
+        $stmt = self::$pdo->query("SELECT * FROM categorie ORDER BY nom_categorie ASC");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function create($nom_categorie) {
-        $stmt = $this->pdo->prepare("INSERT INTO categorie (nom_categorie) VALUES (:nom)");
+        $stmt = self::$pdo->prepare("INSERT INTO categorie (nom_categorie) VALUES (:nom)");
         $stmt->execute([':nom' => $nom_categorie]);
-        return $this->pdo->lastInsertId();
+        return self::$pdo->lastInsertId();
     }
 
     // Dans Model/categorie.php (Fonction UPDATE)
@@ -35,7 +35,7 @@ class Categorie{
               SET nom_categorie = :nom_categorie
               WHERE num_categorie = :num_categorie";
 
-    $stmt = $this->pdo->prepare($query);
+    $stmt = self::$pdo->prepare($query);
     
     return $stmt->execute([
         ':nom_categorie' => $data->nom_categorie,

@@ -19,7 +19,7 @@ class CategorieTechnicien {
     }
 
     public function create($id_categorie, $id_technicien) {
-        $stmt = $this->pdo->prepare("INSERT INTO categorie_technicien (id_categorie, id_technicien) VALUES (:cat, :tech)");
+        $stmt = self::$pdo->prepare("INSERT INTO categorie_technicien (id_categorie, id_technicien) VALUES (:cat, :tech)");
         return $stmt->execute([
             ':cat'  => $id_categorie,
             ':tech' => $id_technicien
@@ -31,7 +31,7 @@ class CategorieTechnicien {
                   FROM categorie_technicien ct
                   JOIN categorie c ON ct.id_categorie = c.num_categorie
                   WHERE ct.id_technicien = :id";
-        $stmt = $this->pdo->prepare($query);
+        $stmt = self::$pdo->prepare($query);
         $stmt->execute([':id' => $id_technicien]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -42,7 +42,7 @@ class CategorieTechnicien {
                   id_technicien = :id_technicien
               WHERE id_cat_tech = :id_cat_tech";
 
-        $stmt = $this->pdo->prepare($query);
+        $stmt = self::$pdo->prepare($query);
     
         return $stmt->execute([
         ':id_categorie'  => $data->id_categorie,

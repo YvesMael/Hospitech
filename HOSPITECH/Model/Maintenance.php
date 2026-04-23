@@ -1,7 +1,7 @@
 <?php
 abstract class Maintenance {
     // PROTECTED : Les classes filles y ont accès, mais pas l'extérieur
-    protected $pdo; 
+    protected static $pdo; 
 
     // Méthode partagée par tous les enfants pour créer la partie "Mère" en base
     protected function createMere($data) {

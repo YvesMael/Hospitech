@@ -25,7 +25,7 @@ class Equipement {
                   LEFT JOIN salle s ON e.num_salle = s.num_salle
                   LEFT JOIN hopital h ON e.id_hopital = h.id_hopital
                   ORDER BY e.date_prochaine_maintenance ASC";
-        return $this->pdo->query($query)->fetchAll(PDO::FETCH_ASSOC);
+        return self::$pdo->query($query)->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function create($data) {
@@ -33,7 +33,7 @@ class Equipement {
                   (code_equip, num_equip, marque, modele, etat_equip, date_ajout, freq_jours, freq_mois, freq_ans, num_salle, id_categorie, id_hopital) 
                   VALUES (:code, :num, :marque, :modele, :etat, :date_aj, :fj, :fm, :fa, :salle, :cat, :hopital)";
         
-        $stmt = $this->pdo->prepare($query);
+        $stmt = self::$pdo->prepare($query);
         return $stmt->execute([
             ':code'    => $data['code_equip'],
             ':num'     => $data['num_equip'],
@@ -58,7 +58,7 @@ class Equipement {
                     num_salle = :salle, id_categorie = :cat, id_hopital = :hopital
                   WHERE code_equip = :code";
                   
-        $stmt = $this->pdo->prepare($query);
+        $stmt = self::$pdo->prepare($query);
         $stmt->execute([
             ':marque'  => $data['marque'] ?? null,
             ':modele'  => $data['modele'] ?? null,
