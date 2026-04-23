@@ -19,7 +19,7 @@ class Hopital{
     }
 
     public function getAll() {
-        return $this->pdo->query("SELECT * FROM hopital ORDER BY nom_hopital ASC")->fetchAll(PDO::FETCH_ASSOC);
+        return self::$pdo->query("SELECT * FROM hopital ORDER BY nom_hopital ASC")->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function create($data) {
@@ -39,7 +39,7 @@ class Hopital{
                   telephone = :telephone 
               WHERE id_hopital = :id_hopital";
 
-    $stmt = $this->pdo->prepare($query);
+    $stmt = self::$pdo->prepare($query);
     
     return $stmt->execute([
         ':nom_hopital' => $data->nom_hopital,
