@@ -25,23 +25,27 @@ require_once 'config.php';
 // =========================================================================
 // 2. L'AUTOLOADER INTELLIGENT (Version propre / Production)
 // =========================================================================
+// =========================================================================
+// 2. L'AUTOLOADER INTELLIGENT (Norme Dossiers Minuscules)
+// =========================================================================
+// =========================================================================
+// 2. L'AUTOLOADER INTELLIGENT (Norme Dossiers Minuscules)
+// =========================================================================
 spl_autoload_register(function ($nom_de_la_classe) {
     
     // CAS A : C'est un Contrôleur
     if (strpos($nom_de_la_classe, 'Controller') !== false) {
         $nom_table = str_replace('Controller', '', $nom_de_la_classe);
-        // On gère le cas particulier de CategorieTechnicien
-        if ($nom_table === 'CategorieTechnicien') {
-            $dossier = 'CategorieTechnicien'; // Mets ici LE NOM EXACT de ton dossier sur ton PC
-        } else {
-            $dossier = strtolower($nom_table); // Pour les autres (hopital, categorie, etc.)
-        }
+        
+        // On force le nom du dossier TOUT en minuscules
+        $dossier = strtolower($nom_table); 
+        
+        // Chemin final : Controllers/categorietechnicien/CategorieTechnicienController.php
         $chemin = 'Controllers/' . $dossier . '/' . $nom_de_la_classe . '.php';
         
         if (file_exists($chemin)) {
             require_once $chemin;
         } else {
-            // Si le fichier manque, on lance une exception propre
             throw new Exception("Le fichier Contrôleur est introuvable : " . $chemin);
         }
     } 
@@ -52,7 +56,6 @@ spl_autoload_register(function ($nom_de_la_classe) {
         if (file_exists($chemin)) {
             require_once $chemin;
         } else {
-            // Si le fichier manque, on lance une exception propre
             throw new Exception("Le fichier Modèle est introuvable : " . $chemin);
         }
     }
