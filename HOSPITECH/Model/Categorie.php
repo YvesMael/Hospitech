@@ -29,8 +29,10 @@ class Categorie {
         $db = self::getConnexion();
         $query = "INSERT INTO Categorie (nom_categorie) VALUES (:nom_categorie)";
         $stmt = $db->prepare($query);
+        
+        // C'est ICI que ça plante si $data est un texte au lieu d'un objet
         return $stmt->execute([
-            ':nom_categorie' => $data->nom_categorie
+            ':nom_categorie' => $data->nom_categorie 
         ]);
     }
 

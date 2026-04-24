@@ -58,5 +58,6 @@ class CategorieController {
             echo json_encode(["status" => "error", "message" => "Format JSON invalide ou identifiant (num_categorie) manquant."]);
         }
     }
+    
 }
 ?>
