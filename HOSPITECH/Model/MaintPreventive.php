@@ -1,45 +1,51 @@
 <?php
-//require_once '../config.php';
-require_once 'Maintenance.php'; // On inclut la classe mère
 
-// La classe hérite de la classe abstraite
 class MaintPreventive extends Maintenance {
 
-    public function __construct() {
-        try {
-            // Suppression de charset=utf8mb4 (non supporté par le driver pgsql dans le DSN)
-            $dsn = "pgsql:host=".DB_HOST.";port=".DB_PORT.";dbname=".DB_NAME;
-            static::$pdo = new PDO($dsn, DB_USER, DB_PASS);
-            static::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            
-            // Forcer l'UTF8 si nécessaire
-            static::$pdo->exec("SET NAMES 'UTF8'");
-        } catch (\PDOException $e) {
-            die("Erreur de connexion : " . $e->getMessage());
-        }
-    }
-
     public function createComplete($data) {
+        $db = self::getConnexion();
+        
         try {
-            // 1. On démarre la transaction ici (car on est connecté)
-            static::$pdo->beginTransaction();
+            // On démarre la transaction : on bloque les écritures temporairement
+            $db->beginTransaction();
 
-            // 2. On appelle la méthode de la classe mère abstraite
-            $num_maintenance = $this->createMere($data);
+            // 1. Insertion dans la mère (Maintenance)
+            $queryMere = "INSERT INTO Maintenance (date_heure, diagnostic, actions_effectuees, date_remise_service, num_equip_ref, id_technicien) 
+                          VALUES (:date_heure, :diagnostic, :actions_effectuees, :date_remise_service, :num_equip_ref, :id_technicien)";
+            $stmtMere = $db->prepare($queryMere);
+            $stmtMere->execute([
+                ':date_heure'          => $data->date_heure,
+                ':diagnostic'          => $data->diagnostic,
+                ':actions_effectuees'  => $data->actions_effectuees,
+                ':date_remise_service' => $data->date_remise_service,
+                ':num_equip_ref'       => $data->num_equip_ref,
+                ':id_technicien'       => $data->id_technicien
+            ]);
 
-            // 3. On insère dans la table fille
-            $stmt = static::$pdo->prepare("INSERT INTO maint_preventive (num_maintenance) VALUES (:num)");
-            $stmt->execute([':num' => $num_maintenance]);
+            // On récupère l'ID généré par la mère
+            $num_maintenance = $db->lastInsertId();
 
-            // 4. On valide le tout !
-            static::$pdo->commit();
+            // 2. Insertion dans la fille (Maint_Preventive)
+            $queryFille = "INSERT INTO Maint_Preventive (num_maintenance) VALUES (:num_maintenance)";
+            $stmtFille = $db->prepare($queryFille);
+            $stmtFille->execute([
+                ':num_maintenance' => $num_maintenance
+            ]);
+
+            // Tout s'est bien passé, on valide définitivement l'enregistrement !
+            $db->commit();
+            
             return $num_maintenance;
 
         } catch (Exception $e) {
-            // En cas de problème (soit mère, soit fille), on annule tout
-            static::$pdo->rollBack();
-            throw new Exception("Erreur lors de la création de la maintenance préventive : " . $e->getMessage());
+            // Si la moindre chose plante, on annule tout
+            $db->rollBack();
+            throw $e; // On renvoie l'erreur au contrôleur
         }
     }
+
+    // 💡 Astuce : Pas besoin d'écrire une fonction update() ici !
+    // Puisque Maint_Preventive n'a pas de colonnes à elle, si le contrôleur fait $model->update(), 
+    // PHP appellera automatiquement le update() de la classe mère Maintenance. C'est la magie de l'héritage.
 }
 ?>

@@ -1,56 +1,80 @@
 <?php
-// On inclut les identifiants et la classe mère abstraite
-//require_once '../config.php';
-require_once 'Maintenance.php'; 
 
 class MaintCorrective extends Maintenance {
 
-    // 1. L'enfant gère sa propre connexion
-    public function __construct() {
-        try {
-            // Suppression de charset=utf8mb4 (non supporté par le driver pgsql dans le DSN)
-            $dsn = "pgsql:host=".DB_HOST.";port=".DB_PORT.";dbname=".DB_NAME;
-            static::$pdo = new PDO($dsn, DB_USER, DB_PASS);
-            static::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            
-            // Forcer l'UTF8 si nécessaire
-            static::$pdo->exec("SET NAMES 'UTF8'");
-        } catch (\PDOException $e) {
-            die("Erreur de connexion : " . $e->getMessage());
-        }
-    }
-
-    // 2. La méthode qui gère la transaction complète (Mère + Fille)
     public function createComplete($data) {
+        $db = self::getConnexion();
+        
         try {
-            // Début de la transaction
-            static::$pdo->beginTransaction();
+            $db->beginTransaction();
 
-            // A. On appelle la fonction de la classe Mère (MaintenanceModel)
-            // Elle insère la date, le diagnostic, etc., et nous renvoie l'ID généré
-            $num_maintenance = $this->createMere($data);
-
-            // B. On insère les données spécifiques à la PANNE dans la table Fille
-            $query = "INSERT INTO maint_corrective (num_maintenance, date_apparit_panne, description_panne, id_personnel_medical, statut_maint) 
-                      VALUES (:num, :date_panne, :desc, :id_perso, :statut)";
-            
-            $stmt = static::$pdo->prepare($query);
-            $stmt->execute([
-                ':num'        => $num_maintenance, // L'ID hérité de la mère
-                ':date_panne' => $data['date_apparit_panne'] ?? null,
-                ':desc'       => $data['description_panne'] ?? null,
-                ':id_perso'   => $data['id_personnel_medical'] ?? null,
-                ':statut'     => $data['statut_maint'] ?? 'non réalisée'
+            // 1. Insertion dans la mère
+            $queryMere = "INSERT INTO Maintenance (date_heure, diagnostic, actions_effectuees, date_remise_service, num_equip_ref, id_technicien) 
+                          VALUES (:date_heure, :diagnostic, :actions_effectuees, :date_remise_service, :num_equip_ref, :id_technicien)";
+            $stmtMere = $db->prepare($queryMere);
+            $stmtMere->execute([
+                ':date_heure'          => $data->date_heure,
+                ':diagnostic'          => $data->diagnostic,
+                ':actions_effectuees'  => $data->actions_effectuees,
+                ':date_remise_service' => $data->date_remise_service,
+                ':num_equip_ref'       => $data->num_equip_ref,
+                ':id_technicien'       => $data->id_technicien
             ]);
 
-            // Si on arrive ici sans erreur, on valide tout dans la base de données !
-            static::$pdo->commit();
+            $num_maintenance = $db->lastInsertId();
+
+            // 2. Insertion dans la fille avec ses attributs spécifiques
+            $queryFille = "INSERT INTO Maint_Corrective (num_maintenance, date_apparit_panne, description_panne, id_personnel_medical, statut_maint) 
+                           VALUES (:num_maintenance, :date_apparit_panne, :description_panne, :id_personnel_medical, :statut_maint)";
+            $stmtFille = $db->prepare($queryFille);
+            $stmtFille->execute([
+                ':num_maintenance'      => $num_maintenance,
+                ':date_apparit_panne'   => $data->date_apparit_panne,
+                ':description_panne'    => $data->description_panne,
+                ':id_personnel_medical' => $data->id_personnel_medical,
+                ':statut_maint'         => $data->statut_maint
+            ]);
+
+            $db->commit();
             return $num_maintenance;
 
         } catch (Exception $e) {
-            // En cas d'erreur (problème de clé étrangère, champ manquant...), on annule tout
-            static::$pdo->rollBack();
-            throw new Exception("Erreur Maintenance Corrective : " . $e->getMessage());
+            $db->rollBack();
+            throw $e;
+        }
+    }
+
+    public function update($data) {
+        $db = self::getConnexion();
+        
+        try {
+            $db->beginTransaction();
+
+            // 1. On met à jour la mère en appelant la fonction du parent !
+            parent::update($data);
+
+            // 2. On met à jour les données spécifiques de la fille
+            $queryFille = "UPDATE Maint_Corrective 
+                           SET date_apparit_panne = :date_apparit_panne, 
+                               description_panne = :description_panne, 
+                               id_personnel_medical = :id_personnel_medical, 
+                               statut_maint = :statut_maint 
+                           WHERE num_maintenance = :num_maintenance";
+            $stmtFille = $db->prepare($queryFille);
+            $stmtFille->execute([
+                ':date_apparit_panne'   => $data->date_apparit_panne,
+                ':description_panne'    => $data->description_panne,
+                ':id_personnel_medical' => $data->id_personnel_medical,
+                ':statut_maint'         => $data->statut_maint,
+                ':num_maintenance'      => $data->num_maintenance
+            ]);
+
+            $db->commit();
+            return true;
+
+        } catch (Exception $e) {
+            $db->rollBack();
+            throw $e;
         }
     }
 }

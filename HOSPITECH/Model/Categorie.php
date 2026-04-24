@@ -1,46 +1,41 @@
 <?php
-//require_once '../config.php';
 
-class Categorie{
-    private static $pdo;
+class Categorie {
+    private static $pdo = null;
 
-    public function __construct() {
-        try {
-            // Suppression de charset=utf8mb4 (non supporté par le driver pgsql dans le DSN)
-            $dsn = "pgsql:host=".DB_HOST.";port=".DB_PORT.";dbname=".DB_NAME;
-            self::$pdo = new PDO($dsn, DB_USER, DB_PASS);
-            self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            
-            // Forcer l'UTF8 si nécessaire
-            self::$pdo->exec("SET NAMES 'UTF8'");
-        } catch (\PDOException $e) {
-            die("Erreur de connexion : " . $e->getMessage());
+    private static function getConnexion() {
+        if (self::$pdo === null) {
+            try {
+                $dsn = "pgsql:host=".DB_HOST.";port=".DB_PORT.";dbname=".DB_NAME;
+                self::$pdo = new PDO($dsn, DB_USER, DB_PASS);
+                self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                self::$pdo->exec("SET NAMES 'UTF8'");
+            } catch (\PDOException $e) {
+                die("Erreur de connexion : " . $e->getMessage());
+            }
         }
+        return self::$pdo;
     }
 
-    public function getAll() {
-        $stmt = self::$pdo->query("SELECT * FROM categorie ORDER BY nom_categorie ASC");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    public function create($data) {
+        $db = self::getConnexion();
+        $query = "INSERT INTO Categorie (nom_categorie) VALUES (:nom_categorie)";
+        $stmt = $db->prepare($query);
+        return $stmt->execute([
+            ':nom_categorie' => $data->nom_categorie
+        ]);
     }
 
-    public function create($nom_categorie) {
-        $stmt = self::$pdo->prepare("INSERT INTO categorie (nom_categorie) VALUES (:nom)");
-        $stmt->execute([':nom' => $nom_categorie]);
-        return self::$pdo->lastInsertId();
-    }
-
-    // Dans Model/categorie.php (Fonction UPDATE)
     public function update($data) {
-    $query = "UPDATE categorie 
-              SET nom_categorie = :nom_categorie
-              WHERE num_categorie = :num_categorie";
-
-    $stmt = self::$pdo->prepare($query);
-    
-    return $stmt->execute([
-        ':nom_categorie' => $data->nom_categorie,
-        ':num_categorie' => $data->num_categorie
-    ]);
+        $db = self::getConnexion();
+        $query = "UPDATE Categorie 
+                  SET nom_categorie = :nom_categorie
+                  WHERE num_categorie = :num_categorie";
+        $stmt = $db->prepare($query);
+        return $stmt->execute([
+            ':nom_categorie' => $data->nom_categorie,
+            ':num_categorie' => $data->num_categorie
+        ]);
     }
 }
 ?>
