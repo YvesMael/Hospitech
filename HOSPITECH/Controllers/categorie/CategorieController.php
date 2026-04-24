@@ -1,78 +1,61 @@
 <?php
-// Le Contrôleur inclut son Modèle
-//require_once '../Model/Categorie.php';
 
 class CategorieController {
-    private $model;
 
-    public function __construct() {
-        // Il instancie le modèle tout seul comme un grand !
-       $this->model = new Categorie();
-    }
-
-    // À ajouter dans la classe CategorieController
     public function getAll() {
         try {
             $model = new Categorie();
             $categories = $model->findAll();
             
             http_response_code(200);
-            echo json_encode([
-                "status" => "success", 
-                "data" => $categories
-            ]);
+            echo json_encode(["status" => "success", "data" => $categories]);
         } catch (Exception $e) {
             http_response_code(500);
-            echo json_encode([
-                "status" => "error", 
-                "message" => "Erreur lors de la récupération des catégories : " . $e->getMessage()
-            ]);
+            echo json_encode(["status" => "error", "message" => $e->getMessage()]);
         }
     }
 
     public function create() {
-        $data = json_decode(file_get_contents("php://input"), true);
-        if (!empty($data['nom_categorie'])) {
+        $json = file_get_contents("php://input");
+        $data = json_decode($json);
+
+        // Sécurité : on vérifie que $data est bien un objet JSON valide et que le nom est présent
+        if (is_object($data) && !empty($data->nom_categorie)) {
             try {
-                $id = $this->model->create($data['nom_categorie']);
+                $model = new Categorie();
+                $model->create($data);
+                
                 http_response_code(201);
-                echo json_encode(["status" => "success", "message" => "Catégorie créée", "num_categorie" => $id]);
+                echo json_encode(["status" => "success", "message" => "Catégorie ajoutée avec succès."]);
             } catch (Exception $e) {
-                http_response_code(400);
+                http_response_code(500);
                 echo json_encode(["status" => "error", "message" => $e->getMessage()]);
             }
         } else {
             http_response_code(400);
-            echo json_encode(["status" => "error", "message" => "Le champ 'nom_categorie' est requis."]);
+            echo json_encode(["status" => "error", "message" => "Format JSON invalide ou nom de la catégorie manquant."]);
         }
     }
+
     public function update() {
         $json = file_get_contents("php://input");
         $data = json_decode($json);
 
-        // Sécurité : on exige num_categorie (selon ton SQL)
-        if (!empty($data) && isset($data->num_categorie)) {
+        // Sécurité : on exige l'objet JSON et num_categorie
+        if (is_object($data) && !empty($data) && isset($data->num_categorie)) {
             try {
-                $this->model->update($data);
+                $model = new Categorie();
+                $model->update($data);
                 
                 http_response_code(200);
-                echo json_encode([
-                    "status" => "success", 
-                    "message" => "Catégorie mise à jour avec succès."
-                ]);
+                echo json_encode(["status" => "success", "message" => "Catégorie mise à jour avec succès."]);
             } catch (Exception $e) {
                 http_response_code(500);
-                echo json_encode([
-                    "status" => "error", 
-                    "message" => "Erreur lors de la mise à jour : " . $e->getMessage()
-                ]);
+                echo json_encode(["status" => "error", "message" => $e->getMessage()]);
             }
         } else {
             http_response_code(400);
-            echo json_encode([
-                "status" => "error", 
-                "message" => "L'identifiant de la catégorie (num_categorie) est strictement requis."
-            ]);
+            echo json_encode(["status" => "error", "message" => "Format JSON invalide ou identifiant (num_categorie) manquant."]);
         }
     }
 }
