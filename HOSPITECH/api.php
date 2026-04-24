@@ -30,7 +30,12 @@ spl_autoload_register(function ($nom_de_la_classe) {
     // CAS A : C'est un Contrôleur
     if (strpos($nom_de_la_classe, 'Controller') !== false) {
         $nom_table = str_replace('Controller', '', $nom_de_la_classe);
-        $dossier = strtolower($nom_table);
+        // On gère le cas particulier de CategorieTechnicien
+        if ($nom_table === 'CategorieTechnicien') {
+            $dossier = 'CategorieTechnicien'; // Mets ici LE NOM EXACT de ton dossier sur ton PC
+        } else {
+            $dossier = strtolower($nom_table); // Pour les autres (hopital, categorie, etc.)
+        }
         $chemin = 'Controllers/' . $dossier . '/' . $nom_de_la_classe . '.php';
         
         if (file_exists($chemin)) {
