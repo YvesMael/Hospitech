@@ -10,10 +10,24 @@ class CategorieController {
        $this->model = new Categorie();
     }
 
+    // À ajouter dans la classe CategorieController
     public function getAll() {
-        $categories = $this->model->getAll();
-        http_response_code(200);
-        echo json_encode(["status" => "success", "data" => $categories]);
+        try {
+            $model = new Categorie();
+            $categories = $model->findAll();
+            
+            http_response_code(200);
+            echo json_encode([
+                "status" => "success", 
+                "data" => $categories
+            ]);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                "status" => "error", 
+                "message" => "Erreur lors de la récupération des catégories : " . $e->getMessage()
+            ]);
+        }
     }
 
     public function create() {

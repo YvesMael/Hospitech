@@ -27,7 +27,16 @@ class Hopital {
             ':telephone'   => $data->telephone
         ]);
     }
-
+    public function findAll() {
+        $db = self::getConnexion();
+        $query = "SELECT * FROM Hopital";
+        $stmt = $db->prepare($query);
+        $stmt->execute();
+        
+        // PDO::FETCH_ASSOC permet de renvoyer un tableau JSON propre 
+        // avec seulement les noms des colonnes (sans les numéros d'index)
+        return $stmt->fetchAll(PDO::FETCH_ASSOC); 
+    }
     public function update($data) {
         $db = self::getConnexion();
         $query = "UPDATE Hopital 

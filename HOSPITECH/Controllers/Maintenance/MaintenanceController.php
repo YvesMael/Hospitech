@@ -5,6 +5,27 @@ class MaintenanceController {
 
     // On supprime le constructeur ! 
     // Le contrôleur ne doit pas deviner quelle classe instancier à l'avance.
+
+    // À ajouter dans la classe MaintenanceController
+    public function getAll() {
+        try {
+            // Ici, la classe mère suffit pour tout récupérer
+            $model = new Maintenance();
+            $maintenances = $model->findAll();
+            
+            http_response_code(200);
+            echo json_encode([
+                "status" => "success", 
+                "data" => $maintenances
+            ]);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                "status" => "error", 
+                "message" => "Erreur lors de la récupération des maintenances : " . $e->getMessage()
+            ]);
+        }
+    }
     
     public function create() {
         $json = file_get_contents("php://input");

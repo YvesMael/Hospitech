@@ -17,6 +17,18 @@ class Maintenance {
         return self::$pdo;
     }
 
+    public function findAll() {
+        // On utilise static:: au lieu de self:: pour l'héritage
+        $db = static::getConnexion(); 
+        
+        // Cette requête simple ramène toutes les maintenances de base.
+        $query = "SELECT * FROM Maintenance";
+        $stmt = $db->prepare($query);
+        $stmt->execute();
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function update($data) {
         $db = self::getConnexion();
         $query = "UPDATE Maintenance 

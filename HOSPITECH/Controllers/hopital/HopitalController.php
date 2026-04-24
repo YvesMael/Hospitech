@@ -1,65 +1,70 @@
 <?php
-//require_once '../Model/Hopital.php';
 
 class HopitalController {
-    private $model;
 
-    public function __construct() {
-        $this->model = new Hopital();
-    }
 
+
+    // À ajouter dans la classe HopitalController
     public function getAll() {
-        $hopitaux = $this->model->getAll();
-        http_response_code(200);
-        echo json_encode(["status" => "success", "data" => $hopitaux]);
+        try {
+            $model = new Hopital();
+            // On suppose que tu as une fonction findAll() dans ton modèle
+            $hopitaux = $model->findAll(); 
+            
+            http_response_code(200);
+            echo json_encode([
+                "status" => "success", 
+                "data" => $hopitaux
+            ]);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                "status" => "error", 
+                "message" => "Erreur lors de la récupération des hôpitaux : " . $e->getMessage()
+            ]);
+        }
     }
-
     public function create() {
-        $data = json_decode(file_get_contents("php://input"), true);
-        if (!empty($data['nom_hopital'])) {
+        $json = file_get_contents("php://input");
+        $data = json_decode($json);
+
+        if (!empty($data->nom_hopital) && !empty($data->adresse) && !empty($data->telephone)) {
             try {
-                $id = $this->model->create($data);
+                // On instancie le modèle localement à la volée
+                $model = new Hopital();
+                $model->create($data);
+                
                 http_response_code(201);
-                echo json_encode(["status" => "success", "message" => "Hôpital créé avec succès.", "id_hopital" => $id]);
+                echo json_encode(["status" => "success", "message" => "Hôpital ajouté avec succès."]);
             } catch (Exception $e) {
-                http_response_code(400);
+                http_response_code(500);
                 echo json_encode(["status" => "error", "message" => $e->getMessage()]);
             }
         } else {
             http_response_code(400);
-            echo json_encode(["status" => "error", "message" => "Le nom de l'hôpital est requis."]);
+            echo json_encode(["status" => "error", "message" => "Données incomplètes."]);
         }
     }
 
     public function update() {
-        // 1. Récupération des données Front-end ou Postman
         $json = file_get_contents("php://input");
         $data = json_decode($json);
 
-        // 2. Sécurité : on exige l'id_hopital
         if (!empty($data) && isset($data->id_hopital)) {
             try {
-                // 3. Appel au modèle
-                $this->model->update($data);
+                // On instancie le modèle localement à la volée
+                $model = new Hopital();
+                $model->update($data);
                 
                 http_response_code(200);
-                echo json_encode([
-                    "status" => "success", 
-                    "message" => "Hôpital mis à jour avec succès."
-                ]);
+                echo json_encode(["status" => "success", "message" => "Hôpital mis à jour avec succès."]);
             } catch (Exception $e) {
                 http_response_code(500);
-                echo json_encode([
-                    "status" => "error", 
-                    "message" => "Erreur lors de la mise à jour de l'hôpital : " . $e->getMessage()
-                ]);
+                echo json_encode(["status" => "error", "message" => $e->getMessage()]);
             }
         } else {
             http_response_code(400);
-            echo json_encode([
-                "status" => "error", 
-                "message" => "L'identifiant de l'hôpital (id_hopital) est strictement requis."
-            ]);
+            echo json_encode(["status" => "error", "message" => "L'identifiant (id_hopital) est requis."]);
         }
     }
 }

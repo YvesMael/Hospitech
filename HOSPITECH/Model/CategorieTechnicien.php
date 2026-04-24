@@ -17,6 +17,15 @@ class CategorieTechnicien {
         return self::$pdo;
     }
 
+    public function findAll() {
+        $db = self::getConnexion();
+        $query = "SELECT * FROM Categorie_technicien";
+        $stmt = $db->prepare($query);
+        $stmt->execute();
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function create($data) {
         $db = self::getConnexion();
         $query = "INSERT INTO Categorie_technicien (id_categorie, id_technicien) 
